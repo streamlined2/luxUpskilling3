@@ -2,6 +2,7 @@ package org.training.datastructures.map;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 public class HashMap<K, V> implements Map<K, V> {
@@ -70,10 +71,58 @@ public class HashMap<K, V> implements Map<K, V> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public String toString() {
+		//TODO
+		return null;
+	}
 
 	public Iterator<Entry<K, V>> iterator() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	static class MapEntry<K, V> implements Entry<K, V> {
+		
+		private final K key;
+		private V value;
+		
+		public MapEntry(K key, V value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public K getKey() {
+			return key;
+		}
+
+		@Override
+		public V getValue() {
+			return value;
+		}
+
+		@Override
+		public V setValue(V value) {
+			V originalValue = this.value;
+			this.value = value;
+			return originalValue;
+		}
+		
+		@Override
+		public int hashCode() {
+			return Objects.hash(key);
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			if(o instanceof MapEntry<?, ?> entry) {
+				return Objects.equals(key, entry.key);
+			}
+			return false;
+		}
+		
 	}
 
 }
