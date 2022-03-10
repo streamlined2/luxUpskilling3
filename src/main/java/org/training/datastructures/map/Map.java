@@ -29,20 +29,14 @@ public interface Map<K, V> extends Iterable<Map.Entry<K, V>> {
 
 	V remove(K key);
 
-	boolean equals(Object o);
-
-	int hashCode();
-
 	interface Entry<K, V> {
+		
 		K getKey();
 
 		V getValue();
 
 		V setValue(V value);
 
-		int hashCode();
-
-		boolean equals(Object o);
 	}
 
 }
