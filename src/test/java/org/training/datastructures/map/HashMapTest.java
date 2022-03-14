@@ -12,6 +12,17 @@ import org.junit.jupiter.api.Test;
 class HashMapTest {
 
 	@Test
+	@DisplayName("check if toString converts map to string")
+	void testToString() {
+		var map = new HashMap<>();
+		map.put("1", 1);
+		map.put("2", 2);
+		map.put("3", 3);
+
+		assertEquals("[1=1,2=2,3=3]", map.toString());
+	}
+
+	@Test
 	@DisplayName("create empty map with default constructor")
 	void testHashMap() {
 		var map = new HashMap<>();
@@ -35,7 +46,7 @@ class HashMapTest {
 		assertEquals(5, map.size());
 		assertFalse(map.isEmpty());
 		assertEquals(Set.of("1", "2", "3", "4", "5"), map.keySet());
-		assertEquals(Set.of(1, 2, 3, 4, 5), map.values());
+		assertTrue(map.values().equals(Set.of(1, 2, 3, 4, 5)));
 		assertEquals(Set.of(new MapEntry<String, Integer>("1", 1), new MapEntry<String, Integer>("2", 2),
 				new MapEntry<String, Integer>("3", 3), new MapEntry<String, Integer>("4", 4),
 				new MapEntry<String, Integer>("5", 5)), map.entrySet());
@@ -82,10 +93,10 @@ class HashMapTest {
 		assertEquals(2, map.get("1"));
 
 		map.put("2", 3);
-		assertEquals(1, map.size());
+		assertEquals(2, map.size());
 		assertTrue(map.containsKey("1"));
-		assertFalse(map.containsKey("2"));
-		assertEquals(2, map.get("1"));
+		assertTrue(map.containsKey("2"));
+		assertEquals(3, map.get("2"));
 	}
 
 	@Test
@@ -198,7 +209,7 @@ class HashMapTest {
 		map.put("4", 4);
 		map.put("5", 5);
 
-		assertEquals(Set.of(1, 2, 3, 4, 5), map.values());
+		assertTrue(map.values().equals(Set.of(1, 2, 3, 4, 5)));
 	}
 
 	@Test
@@ -269,17 +280,6 @@ class HashMapTest {
 		assertTrue(map.isEmpty());
 		map.putAll(sampleMap);
 		assertEquals(sampleMap, map);
-	}
-
-	@Test
-	@DisplayName("check if toString converts map to string")
-	void testToString() {
-		var map = new HashMap<>();
-		map.put("1", 1);
-		map.put("2", 2);
-		map.put("3", 3);
-
-		assertEquals("[1=1, 2=2, 3=3]", map.toString());
 	}
 
 	@Test

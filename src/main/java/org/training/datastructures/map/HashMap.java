@@ -151,6 +151,19 @@ public class HashMap<K, V> implements Map<K, V> {
 	}
 
 	@Override
+	public int hashCode() {
+		return entrySet().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof HashMap<?, ?> map) {
+			return entrySet().equals(map.entrySet());
+		}
+		return false;
+	}
+
+	@Override
 	public Iterator<Entry<K, V>> iterator() {
 		return new Iterator<Entry<K, V>>() {
 
@@ -158,7 +171,7 @@ public class HashMap<K, V> implements Map<K, V> {
 			private Iterator<Entry<K, V>> listIterator = null;
 
 			private Iterator<Entry<K, V>> getIterator() {
-				if ((listIterator == null || !listIterator.hasNext()) && bucketIterator.hasNext()) {
+				while ((listIterator == null || !listIterator.hasNext()) && bucketIterator.hasNext()) {
 					listIterator = bucketIterator.next().iterator();
 				}
 				return listIterator;
@@ -172,11 +185,10 @@ public class HashMap<K, V> implements Map<K, V> {
 
 			@Override
 			public Entry<K, V> next() {
-				var i = getIterator();
-				if (i == null || !i.hasNext()) {
+				if (listIterator == null || !listIterator.hasNext()) {
 					throw new NoSuchElementException("no more elements in map");
 				}
-				return i.next();
+				return listIterator.next();
 			}
 
 		};
@@ -303,6 +315,28 @@ public class HashMap<K, V> implements Map<K, V> {
 				HashMap.this.clear();
 			}
 
+			@Override
+			public int hashCode() {
+				return Objects.hash(toArray());
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o instanceof Collection<?> collection) {
+					return containsAll(collection) && collection.containsAll(this);
+				}
+				return false;
+			}
+
+			@Override
+			public String toString() {
+				StringJoiner join = new StringJoiner(",", "[", "]");
+				for (var key : this) {
+					join.add(key.toString());
+				}
+				return join.toString();
+			}
+
 		};
 	}
 
@@ -406,6 +440,28 @@ public class HashMap<K, V> implements Map<K, V> {
 			@Override
 			public void clear() {
 				HashMap.this.clear();
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(toArray());
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o instanceof Collection<?> collection) {
+					return containsAll(collection) && collection.containsAll(this);
+				}
+				return false;
+			}
+
+			@Override
+			public String toString() {
+				StringJoiner join = new StringJoiner(",", "[", "]");
+				for (var entry : this) {
+					join.add(entry.getKey() + "=" + entry.getValue());
+				}
+				return join.toString();
 			}
 
 		};
@@ -537,6 +593,28 @@ public class HashMap<K, V> implements Map<K, V> {
 			@Override
 			public void clear() {
 				HashMap.this.clear();
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(toArray());
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o instanceof Collection<?> collection) {
+					return containsAll(collection) && collection.containsAll(this);
+				}
+				return false;
+			}
+
+			@Override
+			public String toString() {
+				StringJoiner join = new StringJoiner(",", "[", "]");
+				for (var value : this) {
+					join.add(value.toString());
+				}
+				return join.toString();
 			}
 
 		};
