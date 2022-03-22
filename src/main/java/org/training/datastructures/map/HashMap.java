@@ -19,7 +19,7 @@ public class HashMap<K, V> implements Map<K, V> {
 	private static final double DEFAULT_LOAD_FACTOR = 0.75;
 
 	private List<? extends List<Entry<K, V>>> buckets;
-	private double loadFactor;
+	private final double loadFactor;
 	private int size;
 
 	public HashMap() {
@@ -67,6 +67,7 @@ public class HashMap<K, V> implements Map<K, V> {
 	}
 
 	private void addEntry(ListIterator<Entry<K, V>> iterator, Entry<K, V> entry) {
+		//reallocateIfNecessary(1);
 		iterator.add(entry);
 		size++;
 	}
@@ -98,19 +99,33 @@ public class HashMap<K, V> implements Map<K, V> {
 		return (int) (index % buckets.size());
 	}
 
-	private boolean shouldReallocate() {
-		return size() > loadFactor * buckets.size();
+	private boolean shouldReallocate(int extraElements) {
+		return size() + extraElements > loadFactor * buckets.size();
 	}
 
 	private int newCapacity() {
 		return 2 * buckets.size();
 	}
 
-	private void reallocateIfNecessary() {
-		if (shouldReallocate()) {
-			var newBuckets = createBucketList(newCapacity());
-			var sourceIterator = iterator();
+	private void reallocateIfNecessary(int extraElements) {
+		if (shouldReallocate(extraElements)) {
+			var data = stashData();
+			buckets = createBucketList(newCapacity());
+			size = 0;
+			for (var entry : data) {
+				put(entry.getKey(), entry.getValue());
+			}
 		}
+	}
+
+	private List<Entry<K, V>> stashData() {
+		var data = new ArrayList<Entry<K, V>>(size());
+		var iterator = iterator();
+		while (iterator.hasNext()) {
+			data.add(iterator.next());
+			iterator.remove();
+		}
+		return data;
 	}
 
 	@Override
@@ -145,11 +160,11 @@ public class HashMap<K, V> implements Map<K, V> {
 
 	@Override
 	public V remove(K key) {
-		Optional<V> originalValue = locateAndApply(new MapEntry<>(key, null),
-				Optional.of(this::removeEntry), Optional.empty());
+		Optional<V> originalValue = locateAndApply(new MapEntry<>(key, null), Optional.of(this::removeEntry),
+				Optional.empty());
 		return originalValue.orElse(null);
 	}
-	
+
 	private void removeEntry(ListIterator<Entry<K, V>> iterator, Entry<K, V> entry) {
 		iterator.remove();
 		size--;
@@ -198,42 +213,44 @@ public class HashMap<K, V> implements Map<K, V> {
 
 	@Override
 	public Iterator<Entry<K, V>> iterator() {
-		return new Iterator<Entry<K, V>>() {
+		return new MapIterator();
+	}
 
-			private final Iterator<? extends List<Entry<K, V>>> bucketIterator = buckets.iterator();
-			private Iterator<Entry<K, V>> listIterator = null;
+	private final class MapIterator implements Iterator<Entry<K, V>> {
 
-			private Iterator<Entry<K, V>> getIterator() {
-				while ((listIterator == null || !listIterator.hasNext()) && bucketIterator.hasNext()) {
-					listIterator = bucketIterator.next().iterator();
-				}
-				return listIterator;
+		private final Iterator<? extends List<Entry<K, V>>> bucketIterator = buckets.iterator();
+		private Iterator<Entry<K, V>> listIterator = null;
+
+		private Iterator<Entry<K, V>> getIterator() {
+			while ((listIterator == null || !listIterator.hasNext()) && bucketIterator.hasNext()) {
+				listIterator = bucketIterator.next().iterator();
 			}
+			return listIterator;
+		}
 
-			@Override
-			public boolean hasNext() {
-				var i = getIterator();
-				return (i != null && i.hasNext());
+		@Override
+		public boolean hasNext() {
+			var i = getIterator();
+			return (i != null && i.hasNext());
+		}
+
+		@Override
+		public Entry<K, V> next() {
+			if (listIterator == null || !listIterator.hasNext()) {
+				throw new NoSuchElementException("no more elements in map");
 			}
+			return listIterator.next();
+		}
 
-			@Override
-			public Entry<K, V> next() {
-				if (listIterator == null || !listIterator.hasNext()) {
-					throw new NoSuchElementException("no more elements in map");
-				}
-				return listIterator.next();
+		@Override
+		public void remove() {
+			if (listIterator == null) {
+				throw new IllegalStateException("method 'next' should be called before 'remove'");
 			}
+			HashMap.this.size--;
+			listIterator.remove();
+		}
 
-			@Override
-			public void remove() {
-				if (listIterator == null) {
-					throw new IllegalStateException("method 'next' should be called before 'remove'");
-				}
-				HashMap.this.size--;
-				listIterator.remove();
-			}
-
-		};
 	}
 
 	@Override
