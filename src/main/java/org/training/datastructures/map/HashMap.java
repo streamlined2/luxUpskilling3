@@ -63,11 +63,11 @@ public class HashMap<K, V> implements Map<K, V> {
 	public V put(K key, V value) {
 		Optional<V> originalValue = locateAndApply(new MapEntry<>(key, value), Optional.of(ListIterator::set),
 				Optional.of(this::addEntry));
+		reallocateIfNecessary();
 		return originalValue.orElse(null);
 	}
 
 	private void addEntry(ListIterator<Entry<K, V>> iterator, Entry<K, V> entry) {
-		//reallocateIfNecessary(1);
 		iterator.add(entry);
 		size++;
 	}
@@ -99,19 +99,18 @@ public class HashMap<K, V> implements Map<K, V> {
 		return (int) (index % buckets.size());
 	}
 
-	private boolean shouldReallocate(int extraElements) {
-		return size() + extraElements > loadFactor * buckets.size();
+	private boolean shouldReallocate() {
+		return size() > loadFactor * buckets.size();
 	}
 
 	private int newCapacity() {
 		return 2 * buckets.size();
 	}
 
-	private void reallocateIfNecessary(int extraElements) {
-		if (shouldReallocate(extraElements)) {
+	private void reallocateIfNecessary() {
+		if (shouldReallocate()) {
 			var data = stashData();
 			buckets = createBucketList(newCapacity());
-			size = 0;
 			for (var entry : data) {
 				put(entry.getKey(), entry.getValue());
 			}

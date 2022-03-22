@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class HashMapTest {
 
 	@Test
-	@DisplayName("check if toString converts map to string")
+	@DisplayName("check if toString converts map to string correctly")
 	void testToString() {
 		var map = new HashMap<>();
 		map.put("1", 1);
@@ -336,5 +336,5 @@ class HashMapTest {
 		var i = map.iterator();
 		assertThrows(IllegalStateException.class, () -> i.remove());
 	}
-	
+
 }
