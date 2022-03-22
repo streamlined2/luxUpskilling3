@@ -216,6 +216,14 @@ public class HashMap<K, V> implements Map<K, V> {
 				}
 				return listIterator.next();
 			}
+			
+			@Override
+			public void remove() {
+				if(listIterator == null) {
+					throw new IllegalStateException("method 'next' should be called before 'remove'");
+				}
+				listIterator.remove();
+			}
 
 		};
 	}

@@ -283,7 +283,7 @@ class HashMapTest {
 	}
 
 	@Test
-	@DisplayName("check if iterator yields object to browse map")
+	@DisplayName("check if iterator yields every element of map and throws exception if no elements available")
 	void testIteratorBrowse() {
 		var map = new HashMap<>();
 		map.put("1", 1);
@@ -325,4 +325,16 @@ class HashMapTest {
 
 	}
 
+	@Test
+	@DisplayName("check if iterator fails to remove object from map if there were no 'next' method call")
+	void testIteratorRemoveFail() {
+		var map = new HashMap<>();
+		map.put("1", 1);
+		map.put("2", 2);
+		map.put("3", 3);
+
+		var i = map.iterator();
+		assertThrows(IllegalStateException.class, () -> i.remove());
+	}
+	
 }
