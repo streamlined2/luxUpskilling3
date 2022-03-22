@@ -15,37 +15,48 @@ import org.training.datastructures.list.List;
 
 public class HashMap<K, V> implements Map<K, V> {
 
-	private static final int DEFAULT_BUCKET_LIST_SIZE = 10;
+	private static final int INITIAL_CAPACITY = 16;
+	private static final double DEFAULT_LOAD_FACTOR = 0.75;
 
 	private List<? extends List<Entry<K, V>>> buckets;
+	private double loadFactor;
+	//private int size;
 
 	public HashMap() {
-		this(DEFAULT_BUCKET_LIST_SIZE);
+		this(INITIAL_CAPACITY);
 	}
 
-	public HashMap(int bucketListSize) {
-		if (bucketListSize <= 0) {
+	public HashMap(int capacity) {
+		this(capacity, DEFAULT_LOAD_FACTOR);
+	}
+
+	public HashMap(int capacity, double loadFactor) {
+		if (capacity <= 0) {
+			throw new IllegalArgumentException(String.format("initial capacity %d should be greater 0", capacity));
+		}
+		if (loadFactor <= 0) {
 			throw new IllegalArgumentException(
-					String.format("initial capacity %d should be greater 0", bucketListSize));
+					String.format("initial load factor %10.2f should be positive value", loadFactor));
 		}
-		buckets = createBucketList(bucketListSize);
-	}
-
-	private List<? extends List<Entry<K, V>>> createBucketList(int bucketListSize) {
-		var newBucketList = new ArrayList<LinkedList<Entry<K, V>>>(bucketListSize);
-		createBuckets(newBucketList, bucketListSize);
-		return newBucketList;
-	}
-
-	private <T extends List<Entry<K, V>>> void createBuckets(List<T> bucketList, int bucketListSize) {
-		for (int k = 0; k < bucketListSize; k++) {
-			bucketList.add((T) new LinkedList<Entry<K, V>>());
-		}
+		this.loadFactor = loadFactor;
+		buckets = createBucketList(capacity);
 	}
 
 	public HashMap(Map<K, V> map) {
 		this(map.size());
 		putAll(map);
+	}
+
+	private List<? extends List<Entry<K, V>>> createBucketList(int capacity) {
+		var newBucketList = new ArrayList<LinkedList<Entry<K, V>>>(capacity);
+		createBuckets(newBucketList, capacity);
+		return newBucketList;
+	}
+
+	private <T extends List<Entry<K, V>>> void createBuckets(List<T> bucketList, int capacity) {
+		for (int k = 0; k < capacity; k++) {
+			bucketList.add((T) new LinkedList<Entry<K, V>>());
+		}
 	}
 
 	@Override
@@ -80,6 +91,21 @@ public class HashMap<K, V> implements Map<K, V> {
 	private int bucketIndex(K key) {
 		long index = key.hashCode() - (long) Integer.MIN_VALUE;
 		return (int) (index % buckets.size());
+	}
+
+	private boolean shouldReallocate() {
+		return size() > loadFactor * buckets.size();
+	}
+
+	private int newCapacity() {
+		return 2 * buckets.size();
+	}
+
+	private void reallocateIfNecessary() {
+		if (shouldReallocate()) {
+			var newBuckets = createBucketList(newCapacity());
+			var sourceIterator = iterator();
+		}
 	}
 
 	@Override

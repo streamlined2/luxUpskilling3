@@ -284,7 +284,7 @@ class HashMapTest {
 
 	@Test
 	@DisplayName("check if iterator yields object to browse map")
-	void testIterator() {
+	void testIteratorBrowse() {
 		var map = new HashMap<>();
 		map.put("1", 1);
 		map.put("2", 2);
@@ -299,6 +299,30 @@ class HashMapTest {
 		assertEquals(new MapEntry<String, Integer>("3", 3), i.next());
 		assertFalse(i.hasNext());
 		assertThrows(NoSuchElementException.class, i::next);
+	}
+
+	@Test
+	@DisplayName("check if iterator removes object from map")
+	void testIteratorRemove() {
+		var map = new HashMap<>();
+		map.put("1", 1);
+		map.put("2", 2);
+		map.put("3", 3);
+
+		var i = map.iterator();
+		assertTrue(i.hasNext());
+		assertEquals(new MapEntry<String, Integer>("1", 1), i.next());
+		i.remove();
+		assertTrue(i.hasNext());
+		assertEquals(new MapEntry<String, Integer>("2", 2), i.next());
+		i.remove();
+		assertTrue(i.hasNext());
+		assertEquals(new MapEntry<String, Integer>("3", 3), i.next());
+		i.remove();
+		assertFalse(i.hasNext());
+		assertThrows(NoSuchElementException.class, i::next);
+		assertTrue(map.isEmpty());
+
 	}
 
 }
