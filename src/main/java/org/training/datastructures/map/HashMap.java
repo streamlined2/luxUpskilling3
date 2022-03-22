@@ -20,7 +20,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
 	private List<? extends List<Entry<K, V>>> buckets;
 	private double loadFactor;
-	//private int size;
+	private int size;
 
 	public HashMap() {
 		this(INITIAL_CAPACITY);
@@ -62,8 +62,13 @@ public class HashMap<K, V> implements Map<K, V> {
 	@Override
 	public V put(K key, V value) {
 		Optional<V> originalValue = locateAndApply(new MapEntry<>(key, value), Optional.of(ListIterator::set),
-				Optional.of(ListIterator::add));
+				Optional.of(this::addEntry));
 		return originalValue.orElse(null);
+	}
+
+	private void addEntry(ListIterator<Entry<K, V>> iterator, Entry<K, V> entry) {
+		iterator.add(entry);
+		size++;
 	}
 
 	private Optional<V> locateAndApply(Entry<K, V> entry,
@@ -122,15 +127,12 @@ public class HashMap<K, V> implements Map<K, V> {
 
 	@Override
 	public int size() {
-		int size = 0;
-		for (var list : buckets) {
-			size += list.size();
-		}
 		return size;
 	}
 
 	@Override
 	public void clear() {
+		size = 0;
 		for (var list : buckets) {
 			list.clear();
 		}
@@ -138,14 +140,19 @@ public class HashMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean isEmpty() {
-		return !iterator().hasNext();
+		return size == 0;
 	}
 
 	@Override
 	public V remove(K key) {
 		Optional<V> originalValue = locateAndApply(new MapEntry<>(key, null),
-				Optional.of((iter, entry) -> iter.remove()), Optional.empty());
+				Optional.of(this::removeEntry), Optional.empty());
 		return originalValue.orElse(null);
+	}
+	
+	private void removeEntry(ListIterator<Entry<K, V>> iterator, Entry<K, V> entry) {
+		iterator.remove();
+		size--;
 	}
 
 	@Override
@@ -216,12 +223,13 @@ public class HashMap<K, V> implements Map<K, V> {
 				}
 				return listIterator.next();
 			}
-			
+
 			@Override
 			public void remove() {
-				if(listIterator == null) {
+				if (listIterator == null) {
 					throw new IllegalStateException("method 'next' should be called before 'remove'");
 				}
+				HashMap.this.size--;
 				listIterator.remove();
 			}
 
